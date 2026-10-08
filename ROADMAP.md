@@ -9,7 +9,8 @@ Kooperatives Online-Multiplayer-Spiel in Godot 4. Crews aus je 1–4 Spielern ar
 | Thema | Entscheidung |
 |---|---|
 | Engine / Sprache | Godot 4.x (aktuelle stabile Version), GDScript |
-| Erfahrung | Godot-Neuling, deshalb enthält die Roadmap Lernphasen |
+| Erfahrung | Godot-Neuling |
+| Entwicklung | Mit **Claude Code** und einem **Godot-MCP-Server**. Claude schreibt den Großteil von Code und Szenen, du steuerst, testest und entscheidest über das Spielgefühl (siehe Abschnitt 4) |
 | Team | Hobby, solo |
 | Spieleranzahl | 3–4 Crews, 1–4 Spieler pro Crew (max. 16), **keine Bots** |
 | Perspektive | First-Person |
@@ -83,25 +84,71 @@ res://
 
 ---
 
-## 4. Roadmap in Phasen
+## 4. Entwicklungs-Workflow mit Claude Code und Godot-MCP
 
-Die Zeitangaben sind grobe Schätzungen für ein Solo-Hobbyprojekt mit etwa 8–10 Stunden pro Woche. Jede Phase endet mit einem **Meilenstein**, also etwas Spielbarem oder klar Prüfbarem.
+### 4.1 Rollenverteilung
 
-### Phase 0: Lernen und Fundament (3–4 Wochen)
+| Claude Code (mit Godot-MCP) | Du |
+|---|---|
+| GDScript schreiben, Szenen und Nodes anlegen, refactoren | Ziele und Prioritäten festlegen, Aufgaben formulieren |
+| Projekt starten, Debug-Ausgabe und Fehler lesen, Bugs fixen | **Spielgefühl beurteilen:** Wabbeligkeit, Timing, Spaß. Das kann Claude nicht fühlen |
+| Automatisierte Tests schreiben und ausführen | Wabbel- und Balance-Parameter im Inspector justieren |
+| Netzwerk-Tests mit mehreren Instanzen skripten | Playtests mit Freunden organisieren und auswerten |
+| Aufgaben in Schritte zerlegen, Architektur vorschlagen | Code-Review in Grundzügen: verstehen, *was* passiert |
+| Platzhalter-Grafik, Shader, UI-Layouts | Art-Direction und finale Assets (Blender, Asset-Packs) |
 
-Ziel: Godot und GDScript sicher genug beherrschen, um nicht ständig blockiert zu sein.
+### 4.2 Was das für die Architektur bedeutet
 
-- [ ] Godot 4 installieren, Git-Repo einrichten (`.gitignore` für Godot, `.godot/`-Ordner ignorieren)
-- [ ] Offizielles Tutorial „Your first 3D game“ durcharbeiten
-- [ ] Grundlagen verstehen: Nodes und Scenes, Signale, `_process` und `_physics_process`, Resources, Autoloads
-- [ ] Einen einfachen First-Person-Controller selbst bauen (laufen, springen, Maus-Look)
-- [ ] Objekte aufheben und werfen (RigidBody plus Raycast)
-- [ ] Mini-Multiplayer-Tutorial: zwei Fenster, ENet, Spieler spawnen und synchronisieren
-- [ ] Debug-Werkzeuge kennenlernen: Remote-Szenenbaum, Profiler, „Run multiple instances“ im Editor
+Claude „sieht“ das Spiel nur über Code, Szenendateien, Logs und (je nach MCP-Server) Screenshots. Deshalb gelten diese Regeln:
 
-**Meilenstein M0:** Zwei lokale Instanzen, in denen zwei First-Person-Figuren herumlaufen und eine Kiste aufheben können.
+- **Prüfbar machen:** Spiellogik (Boxenstopp-Regeln, Rennsimulation, Punkte, Sabotage-Effekte) in reine GDScript-Klassen ohne Rendering legen. Die lassen sich headless testen. Test-Framework: **GUT** oder **gdUnit4**, Ausführung über die Kommandozeile (`godot --headless ...`).
+- **Viel loggen:** Ein zentraler Logger mit Kategorien (`NET`, `PIT`, `RACE`, `SABOTAGE`). Claude liest die Debug-Ausgabe über den MCP-Server und findet Fehler so selbst.
+- **Szenen klein halten:** Viele kleine `.tscn`-Dateien statt einer riesigen. Sie sind Text und lassen sich von Claude lesen und bearbeiten, und Git-Diffs bleiben überschaubar.
+- **Tuning in Resources:** Alle Werte, die du „fühlen“ musst (Federstärke, Wackeln, Standzeiten, Verschleiß), stehen in `.tres`-Dateien. Du drehst im Inspector daran, ohne dass Claude Code ändern muss.
+- **Debug-Hilfen einbauen:** Debug-Overlay (FPS, Ping, Netzwerk-Rolle, Zustände), Tastenkürzel zum Spulen der Rennzeit, Szenario-Start direkt in einen Boxenstopp. Das spart beim Testen enorm Zeit, für dich und für Claude.
+- **Multiplayer-Testskripte:** Ein Startskript, das Host und mehrere Clients automatisch startet und verbindet (über Kommandozeilen-Argumente wie `--host`, `--join`, `--autostart`). Ein **Bot-Input-Modus** für Tests (Figur führt eine Skriptsequenz aus) ist hilfreich, auch wenn es im fertigen Spiel keine Bots gibt.
 
-### Phase 1: Kern-Prototyp „Ist der Boxenstopp lustig?“ (4–6 Wochen, Einzelspieler)
+### 4.3 Arbeitsweise
+
+- **Lokal arbeiten:** Der Godot-MCP-Server braucht den Godot-Editor bzw. die Godot-Binary auf deinem Rechner. Claude Code läuft daher lokal im Projektordner.
+- **`CLAUDE.md` pflegen:** Architekturregeln, Ordnerstruktur, Befehle für Tests und Multi-Instanz-Start, Code-Konventionen. Ein Startpunkt liegt bereits im Repo.
+- **Kleine Aufgaben:** Pro Sitzung *ein* klar umrissenes Ziel („Reifen lässt sich greifen und an der Radnabe einrasten, Test dazu“). Lieber zehn kleine Commits als ein großer Umbau.
+- **Plan-Modus für große Schritte:** Bei Architekturfragen (Netzwerk, Autorität) erst einen Plan von Claude erstellen lassen, prüfen, dann umsetzen.
+- **Nach jeder Aufgabe selbst spielen:** Claude kann prüfen, *ob* etwas funktioniert. Ob es sich gut *anfühlt*, prüfst nur du.
+- **Git als Sicherheitsnetz:** Vor jeder größeren Änderung committen. Mit Branches arbeiten, wenn etwas experimentell ist.
+- **Godot-Version festnageln:** Eine Version wählen und im `CLAUDE.md` vermerken. Godot 3 und 4 unterscheiden sich stark, und Claude soll konsequent Godot-4-APIs verwenden.
+
+### 4.4 Welcher Godot-MCP-Server?
+
+Es gibt mehrere Godot-MCP-Server mit unterschiedlichem Funktionsumfang. Wichtig für dieses Projekt:
+
+- **Pflicht:** Projekt starten und stoppen, Debug-Ausgabe lesen, Szenen anlegen und bearbeiten.
+- **Sehr hilfreich:** Screenshots des laufenden Spiels, Zugriff auf den Szenenbaum zur Laufzeit, Eingaben simulieren.
+- **Nicht nötig:** Alles, was Claude auch direkt über Dateien und die Kommandozeile erledigen kann.
+
+Fehlt etwas im MCP-Server, kann Claude es meist über `godot --headless` plus Skripte in der Shell ergänzen.
+
+---
+
+## 5. Roadmap in Phasen
+
+Die Zeitangaben sind grobe Schätzungen für ein Solo-Hobbyprojekt mit etwa 8–10 Stunden pro Woche und Claude Code als Umsetzer. Jede Phase endet mit einem **Meilenstein**, also etwas Spielbarem oder klar Prüfbarem. „Du“ markiert Aufgaben, die Claude dir nicht abnehmen kann.
+
+### Phase 0: Setup und Grundverständnis (1–2 Wochen)
+
+Ziel: Werkzeugkette steht, und du verstehst Godot gut genug, um Claudes Arbeit zu beurteilen.
+
+- [ ] Godot 4 (feste Version) installieren, Projekt anlegen, `.gitignore` (`.godot/` ignorieren)
+- [ ] Claude Code lokal einrichten, Godot-MCP-Server installieren und verbinden, Verbindung testen (Projekt starten, Log lesen)
+- [ ] `CLAUDE.md` an die gewählte Godot-Version und den MCP-Server anpassen
+- [ ] Test-Framework (GUT oder gdUnit4) einrichten, ein erster Test läuft headless
+- [ ] **Du:** Die Grundbegriffe lernen, damit du mitreden kannst: Nodes und Scenes, Signale, `_process` und `_physics_process`, Resources, Autoloads, `CharacterBody3D` und `RigidBody3D`. Das offizielle Tutorial „Your first 3D game“ ist dafür gut, du kannst es auch gemeinsam mit Claude durchgehen und dir alles erklären lassen
+- [ ] **Du:** Godot-Editor bedienen können: Szene öffnen, Inspector, Remote-Szenenbaum, Profiler
+- [ ] Mit Claude: First-Person-Controller, Objekt aufheben, Multi-Instanz-Startskript mit ENet (zwei Fenster verbinden sich automatisch)
+
+**Meilenstein M0:** Zwei lokale Instanzen starten per Skript, zwei First-Person-Figuren laufen herum und können eine Kiste aufheben. Claude kann das Projekt über den MCP-Server starten und die Logs lesen.
+
+### Phase 1: Kern-Prototyp „Ist der Boxenstopp lustig?“ (3–5 Wochen, Einzelspieler)
 
 Ziel: Den Spielspaß des Kernmechanismus beweisen, bevor Zeit in Netzwerk oder Grafik fließt. Nur Greybox-Grafik (Würfel und Zylinder).
 
@@ -112,11 +159,14 @@ Ziel: Den Spielspaß des Kernmechanismus beweisen, bevor Zeit in Netzwerk oder G
 - [ ] Wagenheber und Lollipop-Freigabe
 - [ ] Ein Dummy-Auto fährt ein, wartet und fährt raus. Die Standzeit wird angezeigt
 - [ ] Fehlerzustände: lose Mutter, Schlauch noch dran, falscher Reifen
+- [ ] Boxenstopp-Regeln als reine Logik-Klasse mit Unit-Tests (Reihenfolge, Fehler, Standzeit)
+- [ ] Debug-Szenario: Spiel startet direkt mit Auto in der Box
+- [ ] **Du:** Wabbel-Parameter so lange justieren, bis es sich „lustig ungenau“ und nicht frustrierend anfühlt. Das ist die wichtigste Aufgabe dieser Phase
 - [ ] **Ein bewusster Schritt:** Code von Anfang an so schreiben, dass alle Spielzustandsänderungen über *eine* Stelle laufen (zum Beispiel `PitStop.request_action(player, action)`). Das macht Phase 3 viel leichter
 
 **Meilenstein M1:** Allein einen kompletten Boxenstopp durchspielen. Er soll sich chaotisch, aber beherrschbar anfühlen. Freunde ausprobieren lassen: Lachen sie?
 
-### Phase 2: Rennsimulation und Funk (3–4 Wochen, Einzelspieler)
+### Phase 2: Rennsimulation und Funk (2–3 Wochen, Einzelspieler)
 
 - [ ] Oval-Strecke als `Path3D`, Boxengasse als zweiter Pfad mit Abzweig
 - [ ] KI-Auto: Geschwindigkeit, Reifenverschleiß, Spritverbrauch, Spurwechsel
@@ -126,10 +176,13 @@ Ziel: Den Spielspaß des Kernmechanismus beweisen, bevor Zeit in Netzwerk oder G
 - [ ] Rennende, Rangliste, Ergebnisbildschirm
 - [ ] Folgen auf der Strecke: Rad fällt ab (Auto humpelt zur Box), leerer Tank (Auto rollt aus)
 - [ ] Blick auf die Strecke: Boxenmauer oder Fenster, damit man das Rennen sieht
+- [ ] Rennsimulation headless testbar: ganzes Rennen in Sekunden durchsimulieren, Ergebnis prüfen
+- [ ] Debug-Taste zum Vorspulen der Rennzeit
+- [ ] **Du:** Rundenzeiten, Verschleiß und Spritverbrauch so einstellen, dass 5–7 Stopps sinnvoll sind
 
 **Meilenstein M2:** Ein komplettes Rennen von 10–15 Minuten allein spielen, mit eigenen Boxenstopps und Strategieentscheidungen.
 
-### Phase 3: Multiplayer-Fundament (6–8 Wochen, schwierigste Phase)
+### Phase 3: Multiplayer-Fundament (4–6 Wochen, schwierigste Phase)
 
 Ziel: Eine Crew mit 2–4 Spielern spielt gemeinsam über das Netzwerk (zunächst LAN oder Localhost).
 
@@ -141,10 +194,12 @@ Ziel: Eine Crew mit 2–4 Spielern spielt gemeinsam über das Netzwerk (zunächs
 - [ ] Rennsimulation läuft nur auf dem Host, Autos werden synchronisiert
 - [ ] Boxenstopp-Zustand synchronisiert (Muttern, Füllstand, Wagenheber)
 - [ ] Latenz-Tests: künstliche Verzögerung oder Paketverlust simulieren (zum Beispiel mit `clumsy` unter Windows oder `tc netem` unter Linux)
+- [ ] Automatisierter Netzwerktest: Host plus Clients headless starten, Bot-Inputs führen einen Boxenstopp aus, Logs aller Instanzen werden auf Desyncs geprüft
+- [ ] **Du:** Mit einer zweiten Person (oder zwei Rechnern) testen, ob sich Greifen und Halten mit Latenz noch gut anfühlt
 
 **Meilenstein M3:** 2–4 Spieler machen zusammen einen Boxenstopp, und es fühlt sich auch mit 100 ms Latenz noch spielbar an.
 
-### Phase 4: Mehrere Crews und Match-Flow (3–4 Wochen)
+### Phase 4: Mehrere Crews und Match-Flow (2–3 Wochen)
 
 - [ ] Boxengasse mit 3–4 nebeneinanderliegenden Garagen
 - [ ] Crew-Zuweisung in der Lobby (Farben), 1–4 Spieler pro Crew
@@ -155,7 +210,7 @@ Ziel: Eine Crew mit 2–4 Spielern spielt gemeinsam über das Netzwerk (zunächs
 
 **Meilenstein M4 (Vertical Slice ohne Sabotage):** 3–4 Crews fahren ein komplettes Rennen gegeneinander.
 
-### Phase 5: Sabotage und Verteidigung (4–6 Wochen)
+### Phase 5: Sabotage und Verteidigung (3–4 Wochen)
 
 **Sabotage (in fremde Box schleichen und Teile manipulieren):**
 - [ ] Reifen anstechen: Er verliert auf der Strecke Luft, der Verschleiß steigt stark
@@ -175,9 +230,11 @@ Ziel: Eine Crew mit 2–4 Spielern spielt gemeinsam über das Netzwerk (zunächs
 - [ ] Abklingzeit oder Begrenzung pro Spieler und Rennen
 - [ ] Schutzzone: Während des eigenen Boxenstopps ist die Box tabu (oder gerade nicht, das ist ein Playtest-Thema)
 
+- [ ] **Du:** Die Balance-Fragen im Playtest beantworten. Claude kann Varianten schnell umsetzen, entscheiden musst du
+
 **Meilenstein M5:** Vollständiges Spielkonzept spielbar. Erster großer Playtest mit Freunden (8–16 Leute).
 
-### Phase 6: Online-Spiel über das Internet (3–5 Wochen)
+### Phase 6: Online-Spiel über das Internet (2–4 Wochen)
 
 - [ ] Entscheidung treffen: GodotSteam (Steam-Lobbys, Einladungen, NAT-Traversal) oder Relay- bzw. Join-Code-Lösung (noray)
 - [ ] Lobby-Browser oder Join-Code
@@ -189,6 +246,9 @@ Ziel: Eine Crew mit 2–4 Spielern spielt gemeinsam über das Netzwerk (zunächs
 
 ### Phase 7: Grafik, Sound, Juice (6+ Wochen, auch parallel möglich)
 
+Hier hilft Claude am wenigsten: Shader, Partikel, UI und das Einbinden von Assets ja, aber Modelle, Animationen und Sounds kommen von dir oder aus Asset-Packs.
+
+
 - [ ] Cartoon-Look: Toon-Shader (Cel-Shading), Outlines, kräftige Farben pro Crew
 - [ ] Assets: Kenney (CC0) als Basis, eigene einfache Modelle in Blender (Lernkurve einplanen)
 - [ ] Spielfiguren: einfache Cartoon-Mechaniker mit sichtbaren Händen im FP-Bild, Ganzkörper für andere Spieler
@@ -198,7 +258,7 @@ Ziel: Eine Crew mit 2–4 Spielern spielt gemeinsam über das Netzwerk (zunächs
 
 **Meilenstein M7:** Das Spiel sieht aus wie ein Spiel und nicht mehr wie ein Prototyp.
 
-### Phase 8: Feinschliff und Release (4–6 Wochen)
+### Phase 8: Feinschliff und Release (3–5 Wochen)
 
 - [ ] Tutorial oder Übungsbox (Einzelspieler)
 - [ ] Optionen: Mausempfindlichkeit, Lautstärke, Grafik, Tastenbelegung
@@ -208,11 +268,11 @@ Ziel: Eine Crew mit 2–4 Spielern spielt gemeinsam über das Netzwerk (zunächs
 
 **Meilenstein M8:** Öffentliche Version 1.0.
 
-**Gesamtaufwand grob:** 9–14 Monate im Hobby-Tempo.
+**Gesamtaufwand grob:** 6–10 Monate im Hobby-Tempo. Claude beschleunigt vor allem Programmierung und Fehlersuche. Spielgefühl, Balancing, Playtests und Grafik bleiben bei dir und bestimmen den Großteil der verbleibenden Zeit.
 
 ---
 
-## 5. Größte Risiken und Gegenmaßnahmen
+## 6. Größte Risiken und Gegenmaßnahmen
 
 | Risiko | Gegenmaßnahme |
 |---|---|
@@ -222,11 +282,14 @@ Ziel: Eine Crew mit 2–4 Spielern spielt gemeinsam über das Netzwerk (zunächs
 | Kleine Crews (1–2 Spieler) sind chancenlos | Balancing-Hebel aus Phase 4; im Zweifel optionale Gleichstellung in der Lobby |
 | Sabotage dominiert und frustriert | Abklingzeiten, Strafen, Inspektion, Playtests. Ein Lobby-Schalter für die Sabotage-Intensität |
 | Scope Creep als Solo-Entwickler | Strikt nach Meilensteinen arbeiten. Neue Ideen in die Liste „Später“ schreiben und nicht sofort bauen |
+| Code wächst schneller, als du ihn verstehst | Claude nach jeder Aufgabe kurz erklären lassen, was geändert wurde. Architekturregeln in `CLAUDE.md`. Regelmäßig aufräumen lassen (Refactoring-Sitzungen) |
+| Claude nutzt veraltete Godot-3-APIs oder rät bei Netzwerkdetails | Godot-Version in `CLAUDE.md` festhalten. Bei Netzwerkfragen die offizielle Doku als Quelle angeben lassen. Tests und Multi-Instanz-Skripte als Kontrolle |
+| Fehler, die nur „im Gefühl“ auftreten, sieht Claude nicht | Präzise beschreiben (was passiert, wann, wie oft), Screenshots oder kurze Videos, Debug-Overlay mitliefern |
 | Motivation sinkt (Solo, lange Laufzeit) | Nach jeder Phase etwas Spielbares mit Freunden testen. Fortschritt öffentlich zeigen (Devlog) |
 
 ---
 
-## 6. Bewusst NICHT in Version 1.0 (Ideenliste „Später“)
+## 7. Bewusst NICHT in Version 1.0 (Ideenliste „Später“)
 
 - Weitere Strecken (Rundkurse mit Kurven, Wetter)
 - Bots als Mechaniker oder KI-Crews
@@ -238,7 +301,7 @@ Ziel: Eine Crew mit 2–4 Spielern spielt gemeinsam über das Netzwerk (zunächs
 
 ---
 
-## 7. Offene Fragen (für spätere Gespräche)
+## 8. Offene Fragen (für spätere Gespräche)
 
 1. **Sieht man die Saboteure?** Teamfarbe immer sichtbar (einfach), oder können sie sich unbemerkt nähern?
 2. **Dürfen Saboteure während eines laufenden Stopps eingreifen** oder nur in der Vorbereitungszeit zwischen den Stopps?
@@ -249,9 +312,10 @@ Ziel: Eine Crew mit 2–4 Spielern spielt gemeinsam über das Netzwerk (zunächs
 
 ---
 
-## 8. Nützliche Ressourcen
+## 9. Nützliche Ressourcen
 
 - Godot-Dokumentation: „High-level multiplayer“, „MultiplayerSynchronizer“, „Physics introduction“
+- GUT oder gdUnit4 (Test-Frameworks für Godot)
 - GodotSteam (Steam-Integration für Godot)
 - noray (NAT-Punchthrough und Relay für Godot)
 - Kenney.nl (kostenlose CC0-Assets)
