@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Kooperatives Online-Multiplayer-Spiel in Godot 4: Crews aus 1–4 Spielern arbeiten als Boxencrew, KI-Fahrer fahren auf einem Oval, Crews sabotieren sich gegenseitig. Konzept und Phasen: siehe `ROADMAP.md`.
+Kooperatives Online-Multiplayer-Spiel in Godot 4: Crews aus 1–4 Spielern arbeiten als Boxencrew, KI-Fahrer fahren auf einem Oval, Crews sabotieren sich gegenseitig. Konzept: `ROADMAP.md`. Arbeitsplan mit Aufgaben und UAT-Gates: `MILESTONES.md`.
 
 ## Rahmen
 
@@ -37,6 +37,7 @@ TODO: ergänzen, sobald eingerichtet.
 
 ## Arbeitsweise
 
+- **Phasen-Gates einhalten:** Nur Aufgaben der aktiven Phase aus `MILESTONES.md` bearbeiten, nie aus einer gesperrten (🔒). Eine Phase ist erst nach bestandenem UAT abgeschlossen; manuelle UAT-Ergebnisse trägt nur der Entwickler ein. Skills: `/next-task`, `/uat`.
 - Pro Aufgabe ein klares Ziel; nach der Umsetzung Projekt starten und Log auf Fehler prüfen.
 - Neue Spiellogik bekommt Tests.
 - Netzwerkänderungen mit mindestens Host plus einem Client prüfen.
