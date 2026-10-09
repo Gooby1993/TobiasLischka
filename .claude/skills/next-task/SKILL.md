@@ -19,3 +19,4 @@ Optionales Argument: eine Aufgaben-ID (z. B. `M1.3`). Ohne Argument die nächste
    - Was geändert wurde (kurz, verständlich für einen Godot-Neuling)
    - Was er selbst im Spiel ausprobieren soll (Gefühl, Timing, Tuning-Werte in welcher `.tres`)
    - Ist das die letzte Aufgabe der Phase: darauf hinweisen, dass jetzt `/uat` dran ist.
+9. **Vorgemerkte Skills empfehlen:** Prüfe die Tabelle „Skills und Hooks“ in `MILESTONES.md`. Für jeden Eintrag mit Status 📌, dessen Auslöser jetzt erreicht ist (aktive Phase bzw. gerade abgeschlossene Aufgabe), dem Entwickler in 1–2 Sätzen empfehlen, was er bringt, und fragen, ob er angelegt werden soll. Nur nach Zustimmung anlegen (`.claude/skills/<name>/SKILL.md` bzw. Hook in `.claude/settings.json`), Status auf ✅ setzen, committen (`skill: <name> anlegen`). Bei Ablehnung Status ⏭. Bereits abgelehnte Einträge nicht erneut empfehlen.

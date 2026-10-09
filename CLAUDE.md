@@ -37,7 +37,8 @@ TODO: ergänzen, sobald eingerichtet.
 
 ## Arbeitsweise
 
-- **Phasen-Gates einhalten:** Nur Aufgaben der aktiven Phase aus `MILESTONES.md` bearbeiten, nie aus einer gesperrten (🔒). Eine Phase ist erst nach bestandenem UAT abgeschlossen; manuelle UAT-Ergebnisse trägt nur der Entwickler ein. Skills: `/next-task`, `/uat`.
+- **Phasen-Gates einhalten:** Nur Aufgaben der aktiven Phase aus `MILESTONES.md` bearbeiten, nie aus einer gesperrten (🔒). Eine Phase ist erst nach bestandenem UAT abgeschlossen; manuelle UAT-Ergebnisse trägt nur der Entwickler ein. Skills: `/next-task`, `/uat`, `/tune`, `/explain`, `/godot-check`. Weitere Skills sind in `MILESTONES.md` unter „Skills und Hooks“ vorgemerkt; sobald ihr Auslöser erreicht ist, dem Entwickler empfehlen und nur nach Zustimmung anlegen.
+- Vor einem Commit mit GDScript-Änderungen `/godot-check` auf die geänderten Dateien anwenden.
 - Pro Aufgabe ein klares Ziel; nach der Umsetzung Projekt starten und Log auf Fehler prüfen.
 - Neue Spiellogik bekommt Tests.
 - Netzwerkänderungen mit mindestens Host plus einem Client prüfen.

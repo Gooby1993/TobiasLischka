@@ -50,6 +50,20 @@ Statuswerte: 🔒 gesperrt · ⬜ offen · 🔨 in Arbeit · 🧪 im UAT · ✅ 
 - Eine Aufgabe gilt erst als erledigt, wenn alle Akzeptanzkriterien geprüft sind.
 - Das UAT-Ergebnis (✅/❌ bei manuellen Testfällen) trägt **nur der Entwickler** ein bzw. bestätigt es. Claude setzt den Gate-Status nie selbst auf ✅.
 
+### Skills und Hooks
+
+**Angelegt:** `/next-task`, `/uat`, `/tune` (Spielgefühl über `.tres`-Werte einstellen), `/explain` (Godot und Projektcode erklären), `/godot-check` (Godot-3-Syntax, Typen, Magic Numbers, Architekturregeln prüfen).
+
+**Vorgemerkt:** Diese Skills und Hooks werden erst angelegt, wenn ihre Voraussetzungen existieren. Claude empfiehlt sie, sobald der Auslöser erreicht ist (siehe `/next-task` und `/uat`), und legt sie nur nach Zustimmung des Entwicklers an. Danach Status auf ✅ setzen und den Eintrag oben unter „Angelegt“ ergänzen. Lehnt der Entwickler ab, Status auf ⏭ setzen.
+
+| Skill / Hook | Empfehlen ab | Voraussetzung | Zweck | Status |
+|---|---|---|---|---|
+| Hook: Tests nach Code-Änderung | nach M0.3 | `tools/run_tests.sh` existiert | Nach jeder Änderung an `.gd`-Dateien laufen die headless Tests automatisch (Hook in `.claude/settings.json`) | 📌 vorgemerkt |
+| `/playtest` | Phase 1, vor `/uat` (Spaßtest U1.8) | UAT-Protokoll und Backlog in dieser Datei | Ungeordnete Spieleabend-Notizen in Befunde mit Schweregrad, Backlog-Einträge oder `M<N>.F*`-Aufgaben überführen | 📌 vorgemerkt |
+| `/devlog` (optional) | nach Gate M1 | erste Gates mit Git-Tags | Aus den Commits seit dem letzten Gate einen kurzen Devlog-Eintrag (itch.io, Social Media) erzeugen | 📌 vorgemerkt |
+| `/net-test` | Phase 3, nach M3.6 | `--test-bot`, `tools/run_net_test.sh`, Prüfsummen-Log | Host plus N Clients mit Bots starten, optional Latenz simulieren, Logs auf Desync und Fehler auswerten | 📌 vorgemerkt |
+| `/perf-check` | Phase 4, bei M4.6 | Lasttest-Setup aus M4.6, Debug-Overlay | FPS und Bandbreite pro Client messen, mit Zielwerten vergleichen, Ergebnis in `docs/perf_*.md` schreiben | 📌 vorgemerkt |
+
 ---
 
 ## Phase 0: Setup und Grundverständnis
